@@ -1,6 +1,9 @@
 <?php
 	include("include/connect.inc");
-	include("ht/jwt_helper.php");
+	//include("ht/jwt_helper.php");
+	require "vendor/autoload.php";
+	use Lcobucci\JWT\Builder;
+	use Lcobucci\JWT\Signer\Hmac\Sha256;
 	
 	// login via post form
 	$loginUser = mysql_real_escape_string($_POST['user']);
@@ -52,13 +55,21 @@
 			{
 				$sql = @mysql_query("UPDATE user SET u_log = '".(new DateTime())->format('d.m.Y H:i')."' WHERE u_id = '".$userId."'");
 				
-				$token = array( "iss" => "https://" . $_SERVER['SERVER_NAME'],
+				/* $token = array( "iss" => "https://" . $_SERVER['SERVER_NAME'],
 								"iat" => time(),
 								"userId" => $userId,
 								"user" => $userName,
 								"admin" => $userObject->u_adm
 								);
-				echo JWT::encode($token, $jwtKey);
+				echo JWT::encode($token, $jwtKey); //*/
+				echo (new Builder())->setIssuer("https://".$_SERVER['SERVER_NAME'])
+									->setIssuedAt(time())
+									->setExpiration(time()+(60*60*24))
+									->set('userId', $userId)
+									->set('user', $userName)
+									->set('admin', $userObject->u_adm)
+									->sign(new Sha256(), 'testit')
+									->getToken();
 			}
 		}
 	}

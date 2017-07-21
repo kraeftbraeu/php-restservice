@@ -1,5 +1,8 @@
 <?php
-	include("ht/jwt_helper.php");
+	require "vendor/autoload.php";
+	use Lcobucci\JWT\Parser;
+	use Lcobucci\JWT\ValidationData;
+	use Lcobucci\JWT\Signer\Hmac\Sha256;
 
 	$isValid = false;
 	try
@@ -16,16 +19,19 @@
 			sendForbidden();
 		else
 		{
-			$jwt = JWT::decode($jwtParam, $jwtKey);
+			$jwt = (new Parser())->parse($jwtParam);
 			// echo json_encode($jwt);
 			
+			$data = new ValidationData(); // It will use the current time to validate (iat, nbf and exp)
+			$data->setIssuer("https://".$_SERVER['SERVER_NAME']);
+
 			$isValid = $jwt !== null;
-			$isValid = $isValid && $jwt->iss === "https://" . $_SERVER['SERVER_NAME'];
-			$isValid = $isValid && time() - $jwt->iat < 60*60*24; // Token ist 1 Tag lang gültig
+			$isValid = $isValid && $jwt->validate($data);
+			$isValid = $isValid && $jwt->verify(new Sha256(), 'testit');
 			
-			$userId = $jwt->userId;
-			$user = $jwt->user;
-			$admin = $jwt->admin;
+			$userId = $jwt->getClaim('userId');
+			$user = $jwt->getClaim('user');
+			$admin = $jwt->getClaim('admin');
 			$isAdmin = $admin === "Y";
 
 			$isValid = $isValid && isset($userId);

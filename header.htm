@@ -30,7 +30,7 @@
 						error: function(){
 							$("#div").append("validation fehlgeschlagen<br/>");
 						},
-						success: function(result3){
+						success: function(result2){
 							$("#div").append("validation erfolgreich:<br/>").append($("<div style='border:1px solid black;'>").html(result2));
 						
 							$.ajax({
@@ -43,8 +43,8 @@
 								error: function(){
 									$("#div").append("getcontent fehlgeschlagen<br/>");
 								},
-								success: function(result2){
-									$("#div").append("getcontent erfolgreich:<br/>").append($("<div style='border:1px solid black;'>").html(result2));
+								success: function(result3){
+									$("#div").append("getcontent erfolgreich:<br/>").append($("<div style='border:1px solid black;'>").html(result3));
 								
 								}
 							});
