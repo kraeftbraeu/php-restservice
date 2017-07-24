@@ -1,0 +1,3 @@
+<?xml version="1.0"?>
+
+<target name="build" depends="prepare,lint,phploc-ci,pdepend,phpmd-ci,phpcs-ci,phpcpd-ci,phpunit,phpdox" description="erzeugt die anwendung" />
