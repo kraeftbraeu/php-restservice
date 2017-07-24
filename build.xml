@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
+<project name="php-restservice">
 
-<project>
-	<target name="build" depends="prepare,lint,phploc-ci,pdepend,phpmd-ci,phpcs-ci,phpcpd-ci,phpunit,phpdox" description="erzeugt die anwendung" />
+	<target name="build" depends="phploc-ci,pdepend,phpmd-ci,phpcs-ci,phpcpd-ci,phpunit,phpdox" description="erzeugt die anwendung" />
 
 	<target name="phploc-ci" depends="prepare" description="Measure project size using PHPLOC and log result in CSV and XML format. Intended for usage within a continuous integration environment.">
 		<exec executable="${toolsdir}phploc">
@@ -14,4 +14,5 @@
 			<arg path="${basedir}/tests"/>
 		</exec>
 	</target>
+
 </project>
