@@ -3,7 +3,7 @@
 
 	<target name="build" depends="phploc-ci,pdepend,phpmd-ci,phpcs-ci,phpcpd-ci,phpunit,phpdox" description="erzeugt die anwendung" />
 
-	<target name="phploc-ci" depends="prepare" description="Measure project size using PHPLOC and log result in CSV and XML format. Intended for usage within a continuous integration environment.">
+	<target name="phploc-ci" description="Measure project size using PHPLOC and log result in CSV and XML format. Intended for usage within a continuous integration environment.">
 		<exec executable="${toolsdir}phploc">
 			<arg value="--count-tests"/>
 			<arg value="--log-csv"/>
