@@ -5,8 +5,8 @@
 	use Lcobucci\JWT\Signer\Hmac\Sha256;
 	
 	// login via post form
-	$loginUser = mysql_real_escape_string($_POST['user']);
-	$loginPw = $_POST['pw'];
+	$loginUser = mysql_real_escape_string($_GET['user']);
+	$loginPw = $_GET['pw'];
 	
 	$queryResult = mysqli_query($link, "SELECT * FROM user WHERE u_name = '".$loginUser."'");
 	if (!$queryResult)

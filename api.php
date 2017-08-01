@@ -78,7 +78,7 @@
 	
 	$dt = new DateTime();
 	$dt = $dt->format('Y-m-d H:i:s');
-	file_put_contents("C:/projekte/mk-xampp/htdocs/wunschliste_2.0/rest.log", "\r\n".$dt." ".$sql, FILE_APPEND | LOCK_EX);
+	file_put_contents("log/rest.log", "\r\n".$dt." ".$sql, FILE_APPEND | LOCK_EX);
 	
 	// die if SQL statement failed
 	if (!$result)
