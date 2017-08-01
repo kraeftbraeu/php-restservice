@@ -1,5 +1,6 @@
 <?php
 	require "vendor/autoload.php";
+	require "data/User.php";
 	use Lcobucci\JWT\Parser;
 	use Lcobucci\JWT\ValidationData;
 	use Lcobucci\JWT\Signer\Hmac\Sha256;
@@ -29,26 +30,20 @@
 			$isValid = $isValid && $jwt->validate($data);
 			$isValid = $isValid && $jwt->verify(new Sha256(), 'testit');
 			
-			$userId = $jwt->getClaim('userId');
-			$user = $jwt->getClaim('user');
-			$admin = $jwt->getClaim('admin');
-			$isAdmin = $admin === "Y";
+			$user = new User($jwt->getClaim('u_id'), $jwt->getClaim('u_name'), $jwt->getClaim('u_adm'));
+			//$isAdmin = $user->admin === "Y";
 
-			$isValid = $isValid && isset($userId);
-			$isValid = $isValid && isset($user);
-			//$isValid = $isValid && isset($admin);
+			$isValid = $isValid && isset($user->id);
+			$isValid = $isValid && isset($user->name);
+			//$isValid = $isValid && isset($user->admin);
 		}
 	}
 	catch (Exception $e)
 	{
 	}
 	if($isValid !== true)
-		sendForbidden();
-
-function sendForbidden()
-{
-	http_response_code(403);
-	echo "HTTP Error 403: Forbidden";
-	exit;
-}
+	{
+		http_response_code(403);
+		die("jwt is not valid");
+	}
 ?>
