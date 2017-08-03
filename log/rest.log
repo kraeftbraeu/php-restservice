@@ -8,3 +8,13 @@
 2017-08-01 12:52:27 insert into `wish` set `w_user`="7",`w_descr`="bla",`w_link`="blabla.bla"
 2017-08-01 21:59:38 select * from `wish` WHERE w_user=7
 2017-08-01 22:04:05 select * from `wish` WHERE w_user=7
+2017-08-03 21:40:38 select * from `wish` WHERE w_user=7
+2017-08-03 21:49:27 select * from `wish` WHERE w_user=7
+2017-08-03 21:51:11 select * from `wish` WHERE w_user=7
+2017-08-03 21:51:18 select * from `wish` WHERE w_user=7
+2017-08-03 21:51:51 select * from `wish` WHERE w_user=7
+2017-08-03 21:52:04 select * from `wish` WHERE w_user=7
+2017-08-03 21:56:15 select * from `wish` WHERE w_user=7
+2017-08-03 21:56:27 select * from `wish` WHERE w_user=7
+2017-08-03 21:56:31 select * from `wish` WHERE w_user=7
+2017-08-03 22:08:38 select * from `wish` WHERE w_user=7

@@ -2,7 +2,8 @@
 	require "ht/connect.php";
 	require "service/JwtService.php";
 	
-	$user = (new JwtService())->getUserFromJwt();
+	if($_SERVER['REQUEST_METHOD'] !== 'OPTIONS')
+		$user = (new JwtService())->getUserFromJwt();
 
 	// get the HTTP method, path and body of the request
 	$method = $_SERVER['REQUEST_METHOD'];

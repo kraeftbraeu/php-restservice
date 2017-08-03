@@ -15,12 +15,11 @@
 				$jwtParam = null;
 				$headers = apache_request_headers();
 				foreach ($headers as $header => $value)
-					if ($header === "jwt")
+					if ($header === "Authorization")
 					{
 						$jwtParam = $value;
 						break;
 					}
-				$jwtParam = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvbG9jYWxob3N0IiwiaWF0IjoxNTAxNTg0Mjc0LCJleHAiOjE1MDE2NzA2NzQsInVfaWQiOiI3IiwidV9uYW1lIjoiTWFudWVsIiwidV9hZG0iOiJZIn0.Cm0ZDY8t4YFuhy2kLNvYlpMwktdAuVHkAi7KSptuy40";
 				if($jwtParam === null)
 					$this->sendForbidden("jwt is not valid");
 				else
