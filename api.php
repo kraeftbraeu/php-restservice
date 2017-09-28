@@ -100,6 +100,8 @@
 	}
 	elseif ($method == 'POST')
 		echo mysqli_insert_id($link);
+	elseif ($method == 'PUT')
+		echo $key;
 	else
 		echo mysqli_affected_rows($link);
 
