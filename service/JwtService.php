@@ -1,9 +1,10 @@
 <?php
+	require "ht/jwt.php";
 	require "vendor/autoload.php";
 	require "data/User.php";
 	use Lcobucci\JWT\Parser;
 	use Lcobucci\JWT\ValidationData;
-	use Lcobucci\JWT\Signer\Hmac\Sha256;
+	use Lcobucci\JWT\Signer\Hmac\Sha512;
 
 	class JwtService
 	{
@@ -12,16 +13,18 @@
 			$isValid = false;
 			try
 			{
-				$jwtParam = null;
-				$headers = apache_request_headers();
-				foreach ($headers as $header => $value)
+				$jwtParam = $_SERVER["REDIRECT_HTTP_AUTHORIZATION"];
+				//$jwtParam = $_SERVER["HTTP_AUTHORIZATION"];
+				/*$jwtParam = null;
+				foreach (apache_request_headers() as $header => $value)
 					if ($header === "Authorization")
 					{
 						$jwtParam = $value;
 						break;
 					}
+				//*/
 				if($jwtParam === null)
-					$this->sendForbidden("jwt is not valid");
+					sendForbidden("jwt header not found")
 				else
 				{
 					$jwt = (new Parser())->parse($jwtParam);
@@ -32,7 +35,7 @@
 
 					$isValid = $jwt !== null;
 					$isValid = $isValid && $jwt->validate($data);
-					$isValid = $isValid && $jwt->verify(new Sha256(), 'testit');
+					$isValid = $isValid && $jwt->verify(new Sha512(), Jwtpw::$jwtpw);
 					
 					$user = new User($jwt->getClaim('u_id'), $jwt->getClaim('u_name'), $jwt->getClaim('u_adm'));
 					//$isAdmin = $user->admin === "Y";
@@ -44,6 +47,7 @@
 			}
 			catch (Exception $e)
 			{
+				$this->sendForbidden($e);
 			}
 			if($isValid !== true)
 				$this->sendForbidden("jwt is not valid");

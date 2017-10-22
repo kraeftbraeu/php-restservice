@@ -6,8 +6,10 @@
 	<script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
 	<script>
 		$(function() {
+			//var restserviceUrl = "http://localhost/restservice/";
+			var restserviceUrl = "http://kraemer.bplaced.net/restservice/";
 			$.ajax({
-				url: "http://localhost/restservice/login.php",
+				url: restserviceUrl + "login.php",
 				type: "post",
 				data: {
 					user: "Manuel",
@@ -17,40 +19,23 @@
 				error: function(){
 					$("#div").append("login fehlgeschlagen<br/>");
 				},
-				success: function(result1){
+				success: function(loginResult){
 					$("#div").append("login erfolgreich<br/>");
-					
-					$.ajax({
-						url: "http://localhost/restservice/isValid.php",
-						type: "post",
-						headers: {
-							"jwt": result1
-						},
-						//dataType: "json",
-						error: function(){
-							$("#div").append("validation fehlgeschlagen<br/>");
-						},
-						success: function(result2){
-							$("#div").append("validation erfolgreich:<br/>").append($("<div style='border:1px solid black;'>").html(result2));
-						
-							$.ajax({
-								url: "http://localhost/restservice/getNavigationLeft.php",
-								type: "get",
-								headers: {
-									"jwt": result1
-								},
-								dataType: "json",
-								error: function(){
-									$("#div").append("getcontent fehlgeschlagen<br/>");
-								},
-								success: function(result3){
-									$("#div").append("getcontent erfolgreich:<br/>").append($("<div style='border:1px solid black;'>").html(result3));
-								
-								}
-							});
+						$.ajax({
+							url: restserviceUrl + "api.php/user",
+							type: "get",
+							headers: {
+								"Authorization": JSON.parse(loginResult).token
+							},
+							dataType: "json",
+							error: function(){
+								$("#div").append("getcontent fehlgeschlagen<br/>");
+							},
+							success: function(result3){
+								$("#div").append("getcontent erfolgreich:<br/>").append($("<div style='border:1px solid black;'>").html(result3));
 							
-						}
-					});
+							}
+						});
 					
 				}
 			});

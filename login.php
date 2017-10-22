@@ -1,8 +1,9 @@
 <?php
 	require "ht/connect.php";
+	require "ht/jwt.php";
 	require "vendor/autoload.php";
 	use Lcobucci\JWT\Builder;
-	use Lcobucci\JWT\Signer\Hmac\Sha256;
+	use Lcobucci\JWT\Signer\Hmac\Sha512;
 	
 	// allow cross-origin request
 	header('Access-Control-Allow-Origin: *'); 
@@ -20,7 +21,7 @@
 	// login via post form
 	if(isset($_POST['user']) && isset($_POST['pw']))
 	{
-		$loginUser = mysql_real_escape_string($_POST['user']);
+		$loginUser = mysqli_real_escape_string($link, $_POST['user']);
 		$loginPw = $_POST['pw'];
 	}
 	else
@@ -77,7 +78,7 @@
 						->set('u_id', $userId)
 						->set('u_name', $userName)
 						->set('u_adm', $userObject->u_adm)
-						->sign(new Sha256(), 'testit')
+						->sign(new Sha512(), Jwtpw::$jwtpw)
 						->getToken()
 						->__toString()
 	));
