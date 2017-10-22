@@ -4,10 +4,24 @@
 	require "data/User.php";
 	use Lcobucci\JWT\Parser;
 	use Lcobucci\JWT\ValidationData;
+	use Lcobucci\JWT\Builder;
 	use Lcobucci\JWT\Signer\Hmac\Sha512;
 
 	class JwtService
 	{
+		public function getToken($userObject)
+		{
+			return (new Builder())->setIssuer("https://".$_SERVER['SERVER_NAME'])
+								  ->setIssuedAt(time())
+								  ->setExpiration(time()+(60*60*24))
+								  ->set('u_id', $userObject->u_id)
+								  ->set('u_name', $userObject->u_name)
+								  ->set('u_adm', $userObject->u_adm)
+								  ->sign(new Sha512(), Jwtpw::$jwtpw)
+								  ->getToken()
+								  ->__toString();
+		}
+
 		public function getUserFromJwt()
 		{
 			$isValid = false;
@@ -24,7 +38,7 @@
 					}
 				//*/
 				if($jwtParam === null)
-					sendForbidden("jwt header not found")
+					sendForbidden("jwt header not found");
 				else
 				{
 					$jwt = (new Parser())->parse($jwtParam);

@@ -1,10 +1,10 @@
 <?php
 	require "ht/connect.php";
-	require "ht/jwt.php";
 	require "vendor/autoload.php";
 	require "service/JwtService.php";
-	use Lcobucci\JWT\Builder;
-	use Lcobucci\JWT\Signer\Hmac\Sha512;
+	require "service/LogService.php";
+	
+	$logService = new LogService();
 	
 	if($_SERVER['REQUEST_METHOD'] !== 'OPTIONS')
 		$user = (new JwtService())->getUserFromJwt();
@@ -20,7 +20,10 @@
 		exit;
 	}
 	else if($method !== 'POST')
+	{
+		$logService->logError("attack on changepw");
 		exit;
+	}
 	
 	// login via post form
 	if(isset($_POST['newpw']))
@@ -32,6 +35,7 @@
 	}
 	if(!isset($newPw) || $newPw === null)
 	{
+		$logService->logError("no new password found");
 		mysqli_close($link);
 		http_response_code(400);
 		die();
@@ -39,22 +43,10 @@
 	$newPwHash = password_hash($newPw, PASSWORD_DEFAULT);
 	$sql = "UPDATE user SET u_pw = '".$newPwHash."' WHERE u_id = '".$user->id."'";
 	mysqli_query($link, $sql);
-	
-	$dt = new DateTime();
-	$dt = $dt->format('Y-m-d H:i:s');
-	file_put_contents("log/rest.log", "\r\n".$dt." ".$sql, FILE_APPEND | LOCK_EX);
+	$logService->logSql($sql);
 	
 	echo json_encode(array(
-		 'token' =>
-		 (new Builder())->setIssuer("https://".$_SERVER['SERVER_NAME'])
-						->setIssuedAt(time())
-						->setExpiration(time()+(60*60*24))
-						->set('u_id', $user->id)
-						->set('u_name', $user->name)
-						->set('u_adm', $user->admin)
-						->sign(new Sha512(), Jwtpw::$jwtpw)
-						->getToken()
-						->__toString()
+		 'token' => (new JwtService())->getToken($user)
 	));
 	
 	mysqli_close($link);

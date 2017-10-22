@@ -1,9 +1,10 @@
 <?php
 	require "ht/connect.php";
-	require "ht/jwt.php";
 	require "vendor/autoload.php";
-	use Lcobucci\JWT\Builder;
-	use Lcobucci\JWT\Signer\Hmac\Sha512;
+	require "service/JwtService.php";
+	require "service/LogService.php";
+	
+	$logService = new LogService();
 	
 	// allow cross-origin request
 	header('Access-Control-Allow-Origin: *'); 
@@ -16,7 +17,10 @@
 		exit;
 	}
 	else if($method !== 'POST')
+	{
+		$logService->logError("attack on login");
 		exit;
+	}
 	
 	// login via post form
 	if(isset($_POST['user']) && isset($_POST['pw']))
@@ -31,16 +35,19 @@
 		$loginPw = $jsonData['pw'];
 	}
 	
-	$queryResult = mysqli_query($link, "SELECT * FROM user WHERE u_name = '".$loginUser."'");
+	$sql = "SELECT * FROM user WHERE u_name = '".$loginUser."'";
+	$queryResult = mysqli_query($link, $sql);
+	$logService->logSql($sql);
 	if (!$queryResult)
 	{
-		$error = mysqli_error($link);
+		$logService->logError(mysqli_error($link));
 		mysqli_close($link);
 		http_response_code(400);
-		die($error);
+		die("SQL error");
 	}
 	if (mysqli_num_rows($queryResult) != 1)
 	{
+		$logService->logError(mysqli_num_rows($queryResult)." users found for username ".$loginUser);
 		mysqli_close($link);
 		http_response_code(401);
 		die("no unique user found");
@@ -49,6 +56,7 @@
 	$dbPwHash = $userObject->u_pw;
 	if (!password_verify($loginPw, $dbPwHash))
 	{
+		$logService->logError("wrong password for user ".$loginUser);
 		mysqli_close($link);
 		http_response_code(401);
 		die("no unique user found");
@@ -57,30 +65,26 @@
 	$userName = $userObject->u_name;
 	if($userId < 0 || empty($userName))
 	{
+		$logService->logError("no user found");
 		mysqli_close($link);
 		http_response_code(401);
 		die("no unique user found");
 	}
 	// login was successful
 
+	// update lastlogin, password
+	$newPwHash = null;
 	if(password_needs_rehash($dbPwHash, PASSWORD_DEFAULT))
-	{
 		$newPwHash = password_hash($loginPw, PASSWORD_DEFAULT);
-		mysqli_query($link, "UPDATE user SET u_pw = '".$newPwHash."' WHERE u_id = '".$userId."'");
-	}
-	mysqli_query($link, "UPDATE user SET u_log = '".date('Y-m-d H:i:s')."' WHERE u_id = '".$userId."'");
+	$sql = "UPDATE user SET u_log = '".date('Y-m-d H:i:s')."'";
+	if($newPwHash != null)
+		$sql .= ", u_pw = '".$newPwHash."'";
+	$sql .= " WHERE u_id = '".$userId."'";
+	mysqli_query($link, $sql);
+	$logService->logSql($sql);
 	
 	echo json_encode(array(
-		 'token' =>
-		 (new Builder())->setIssuer("https://".$_SERVER['SERVER_NAME'])
-						->setIssuedAt(time())
-						->setExpiration(time()+(60*60*24))
-						->set('u_id', $userId)
-						->set('u_name', $userName)
-						->set('u_adm', $userObject->u_adm)
-						->sign(new Sha512(), Jwtpw::$jwtpw)
-						->getToken()
-						->__toString()
+		 'token' => (new JwtService())->getToken($userObject)
 	));
 	
 	mysqli_close($link);
