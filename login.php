@@ -1,8 +1,9 @@
 <?php
-	require "ht/connect.php";
-	require "vendor/autoload.php";
-	require "service/JwtService.php";
-	require "service/LogService.php";
+	require_once "ht/connect.php";
+	require_once "vendor/autoload.php";
+	require_once "service/JwtService.php";
+	require_once "service/LogService.php";
+	require_once "service/SqlService.php";
 	
 	$logService = new LogService();
 	
@@ -21,6 +22,9 @@
 		$logService->logError("attack on login");
 		exit;
 	}
+
+	$sqlService = new SqlService($link, $logService);
+	$jwtService = new JwtService($logService);
 	
 	// login via post form
 	if(isset($_POST['user']) && isset($_POST['pw']))
@@ -35,24 +39,7 @@
 		$loginPw = $jsonData['pw'];
 	}
 	
-	$sql = "SELECT * FROM user WHERE u_name = '".$loginUser."'";
-	$queryResult = mysqli_query($link, $sql);
-	$logService->logSql($sql);
-	if (!$queryResult)
-	{
-		$logService->logError(mysqli_error($link));
-		mysqli_close($link);
-		http_response_code(400);
-		die("SQL error");
-	}
-	if (mysqli_num_rows($queryResult) != 1)
-	{
-		$logService->logError(mysqli_num_rows($queryResult)." users found for username ".$loginUser);
-		mysqli_close($link);
-		http_response_code(401);
-		die("no unique user found");
-	}
-	$userObject = mysqli_fetch_object($queryResult);
+	$userObject = $sqlService->selectUnique("SELECT * FROM user WHERE u_name = '".$loginUser."'");
 	$dbPwHash = $userObject->u_pw;
 	if (!password_verify($loginPw, $dbPwHash))
 	{
@@ -76,16 +63,13 @@
 	$newPwHash = null;
 	if(password_needs_rehash($dbPwHash, PASSWORD_DEFAULT))
 		$newPwHash = password_hash($loginPw, PASSWORD_DEFAULT);
-	$sql = "UPDATE user SET u_log = '".date('Y-m-d H:i:s')."'";
+	$sql = "UPDATE user SET u_log = '".date(SqlService::$dateFormat)."'";
 	if($newPwHash != null)
 		$sql .= ", u_pw = '".$newPwHash."'";
 	$sql .= " WHERE u_id = '".$userId."'";
-	mysqli_query($link, $sql);
-	$logService->logSql($sql);
+	$sqlService->execute($sql);
 	
-	echo json_encode(array(
-		 'token' => (new JwtService())->getToken($userObject)
-	));
+	echo $jwtService->getToken($userObject);
 	
 	mysqli_close($link);
 ?>

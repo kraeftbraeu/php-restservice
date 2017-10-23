@@ -1,21 +1,22 @@
 <?php
 	require "ht/connect.php";
 	require "service/JwtService.php";
-	require "service/SqlService.php";
+	require "service/LogService.php";
+	require "service/AdminService.php";
 	
 	$warning = "";
 	$success = "";
 
-	$user = (new JwtService())->getUserFromJwt();
+	$user = (new JwtService(new LogService()))->getUserFromJwt();
 	$isAdmin = $user->isAdmin();
 	if ($isAdmin)
 	{
-		$sqlService = new SqlService($link);
+		$adminService = new AdminService($link);
 		$nameToTable = array(
-			"user"	 => $sqlService->userTable,
-			"filter" => $sqlService->filterTable,
-			"wish"	 => $sqlService->wishTable,
-			"present" => $sqlService->presentTable
+			"user"	 => $adminService->userTable,
+			"filter" => $adminService->filterTable,
+			"wish"	 => $adminService->wishTable,
+			"present" => $adminService->presentTable
 		);
 
 		// readTable
@@ -32,13 +33,13 @@
 				$dbId = $_POST['dbId'];
 				$dbField = $_POST['dbField'];
 				$newValue = $_POST['dbValue_'.$dbId.'_'.$dbField];
-				$updateResult = $sqlService->sqlUpdate($table, array($dbField => $newValue), $_POST['dbId']);
+				$updateResult = $adminService->sqlUpdate($table, array($dbField => $newValue), $_POST['dbId']);
 				if(!empty($updateResult))
 					$warning .= $updateResult;
 			}
 			
 			// read
-			$tableToRead = $sqlService->sqlSelect("SELECT * FROM ".$t);
+			$tableToRead = $adminService->sqlSelect("SELECT * FROM ".$t);
 		}
 
 		// dropTable
@@ -46,7 +47,7 @@
 		{
 			$dropTable = $_POST['dropTable'];
 			$query = "DROP TABLE ".$dropTable;
-			$dropResult = $sqlService->sql($query);
+			$dropResult = $adminService->sql($query);
 			if(empty($dropResult))
 				$success .= "Tabelle '".$dropTable."' gelöscht<br />\n";
 			else
@@ -64,7 +65,7 @@
 			{
 				$field = $table->fields[$i];
 				$type = $field->type;
-				if($sqlService->startsWith($type, "VARCHAR"))
+				if($adminService->startsWith($type, "VARCHAR"))
 					$type .= " CHARACTER SET utf8 COLLATE utf8_general_ci";
 				$query .= "\n\t".$field->name."\t".$type;
 					if(!$field->mayBeNull)
@@ -74,7 +75,7 @@
 				$query .= ",";
 			}
 			$query .= "\n\tPRIMARY KEY (".$table->fields[0]->name."))";
-			$createResult = $sqlService->sql($query);
+			$createResult = $adminService->sql($query);
 			if(empty($createResult))
 				$success .= "Tabelle '".$table->name."' erstellt<br />\n";
 			else
@@ -97,7 +98,7 @@
 									(NULL, 'Manuel',	'".password_hash("m", PASSWORD_DEFAULT)."', 		'',	'Y'),
 									(NULL, 'Jana',		'".password_hash("Jana", PASSWORD_DEFAULT)."',		'', ''),
 									(NULL, 'Jonas',		'".password_hash("Jonas", PASSWORD_DEFAULT)."',		'', '')";
-				$insertResult = $sqlService->sql($query);
+				$insertResult = $adminService->sql($query);
 				if(empty($insertResult))
 					$success .= "Tabelle '".$fillTable."' gefüllt<br />\n";
 				else
@@ -110,7 +111,7 @@
 		// execute SQL
 		if(isset($_POST['lqs']) && !empty($_POST['lqs']) && isset($dbName))
 		{
-			$sqlResult = $sqlService->sql($_POST['lqs']);
+			$sqlResult = $adminService->sql($_POST['lqs']);
 			if(empty($sqlResult))
 				$success .= "SQL ausgeführt<br />\n";
 			else
@@ -120,7 +121,7 @@
 		// create DB
 		if(isset($_POST['createDB']) && !empty($_POST['createDB']))
 		{
-			$sqlResult = $sqlService->sql("CREATE DATABASE '".$dbName."'");
+			$sqlResult = $adminService->sql("CREATE DATABASE '".$dbName."'");
 			if(empty($sqlResult))
 				$success .= "Datenbank erstellt<br />\n";
 			else
@@ -142,7 +143,7 @@
 						"u_log" => null,
 						"u_adm" => null
 						);
-				$insertResult = $sqlService->sqlInsert($userTable, $fieldsArray);
+				$insertResult = $adminService->sqlInsert($userTable, $fieldsArray);
 				if(empty($insertResult))
 					$success .= "Neuen Admin erfolgreich hinzugefügt<br />\n";
 				else

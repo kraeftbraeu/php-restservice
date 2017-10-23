@@ -1,13 +1,13 @@
 <?php
-	require "ht/connect.php";
-	require "vendor/autoload.php";
-	require "service/JwtService.php";
-	require "service/LogService.php";
+	require_once "ht/connect.php";
+	require_once "vendor/autoload.php";
+	require_once "service/JwtService.php";
+	require_once "service/LogService.php";
+	require_once "service/SqlService.php";
 	
 	$logService = new LogService();
-	
-	if($_SERVER['REQUEST_METHOD'] !== 'OPTIONS')
-		$user = (new JwtService())->getUserFromJwt();
+	$sqlService = new SqlService($link, $logService);
+	$jwtService = new JwtService($logService);
 	
 	// allow cross-origin request
 	header('Access-Control-Allow-Origin: *'); 
@@ -25,6 +25,8 @@
 		exit;
 	}
 	
+	$user = $jwtService->getUserFromJwt();
+
 	// login via post form
 	if(isset($_POST['newpw']))
 		$newPw = $_POST['newpw'];
@@ -38,16 +40,12 @@
 		$logService->logError("no new password found");
 		mysqli_close($link);
 		http_response_code(400);
-		die();
+		die("no new password found");
 	}
 	$newPwHash = password_hash($newPw, PASSWORD_DEFAULT);
-	$sql = "UPDATE user SET u_pw = '".$newPwHash."' WHERE u_id = '".$user->id."'";
-	mysqli_query($link, $sql);
-	$logService->logSql($sql);
+	$sqlService->execute("UPDATE user SET u_pw = '".$newPwHash."' WHERE u_id = '".$user->id."'");
 	
-	echo json_encode(array(
-		 'token' => (new JwtService())->getToken($user)
-	));
+	echo $jwtService->getToken($user);
 	
 	mysqli_close($link);
 ?>

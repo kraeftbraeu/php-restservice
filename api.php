@@ -1,12 +1,14 @@
 <?php
-	require "ht/connect.php";
-	require "service/JwtService.php";
-	require "service/LogService.php";
+	require_once "ht/connect.php";
+	require_once "service/JwtService.php";
+	require_once "service/LogService.php";
+	require_once "service/SqlService.php";
 
 	$logService = new LogService();
+	$sqlService = new SqlService($link, $logService);
 	
 	if($_SERVER['REQUEST_METHOD'] !== 'OPTIONS')
-		$user = (new JwtService())->getUserFromJwt();
+		$user = (new JwtService($logService))->getUserFromJwt();
 
 	// get the HTTP method, path and body of the request
 	$method = $_SERVER['REQUEST_METHOD'];
@@ -75,17 +77,7 @@
 	}
 
 	// excecute SQL statement
-	$result = mysqli_query($link, $sql);
-	$logService->logSql($sql);
-	
-	// die if SQL statement failed
-	if (!$result)
-	{
-		$logService->logError(mysqli_error($link));
-		mysqli_close($link);
-		http_response_code(400);
-		die("SQL error");
-	}
+	$result = $sqlService->execute($sql);
 
 	// print results, insert id or affected row count
 	if ($method == 'GET')
