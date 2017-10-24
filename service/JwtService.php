@@ -1,6 +1,6 @@
 <?php
 require_once "ht/jwt.php";
-require_once "vendor/autoload.php";
+require_once $pathToVendor."vendor/autoload.php";
 require_once "data/User.php";
 require_once "service/LogService.php";
 use Lcobucci\JWT\Parser;
@@ -85,7 +85,7 @@ class JwtService
 	{
 		http_response_code(403);
 		$exceptionMessage = is_null($exception) ? $errorMessage : $exception;
-		$this->logService.logError($exceptionMessage);
+		$this->logService->logError($exceptionMessage);
 		die($errorMessage);
 	}
 }

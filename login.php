@@ -1,6 +1,6 @@
 <?php
 	require_once "ht/connect.php";
-	require_once "vendor/autoload.php";
+	require_once $pathToVendor."vendor/autoload.php";
 	require_once "service/JwtService.php";
 	require_once "service/LogService.php";
 	require_once "service/SqlService.php";

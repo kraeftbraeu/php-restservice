@@ -3,11 +3,23 @@
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 	<meta charset="utf-8">
-	<script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+	<style>
+		div {
+			border: 1px solid black;
+		}
+	</style>
+	<script src="jquery-3.2.1.min.js" type="text/javascript"></script>
 	<script>
+		var restserviceUrl = "./";
+
 		$(function() {
-			var restserviceUrl = "http://localhost/restservice/";
-			//var restserviceUrl = "http://kraemer.bplaced.net/restservice/";
+			checkLogin(
+				checkApiGet
+			);
+		});
+
+		function checkLogin(callback)
+		{
 			$.ajax({
 				url: restserviceUrl + "login.php",
 				type: "post",
@@ -17,32 +29,60 @@
 				},
 				dataType: "text",
 				error: function(){
-					$("#div").append("login fehlgeschlagen<br/>");
+					$("body").append("checkLogin fehlgeschlagen<br/>");
 				},
-				success: function(loginResult){
-					$("#div").append("login erfolgreich<br/>");
-						$.ajax({
-							url: restserviceUrl + "api.php/user",
-							type: "get",
-							headers: {
-								"Authorization": JSON.parse(loginResult).token
-							},
-							dataType: "json",
-							error: function(){
-								$("#div").append("getcontent fehlgeschlagen<br/>");
-							},
-							success: function(contentResult){
-								$("#div").append("getcontent erfolgreich:<br/>").append($("<div style='border:1px solid black;'>").html(JSON.parse(contentResult)));
-							
-							}
-						});
-					
+				success: function(result){
+					var token = JSON.parse(result).token;
+					$("body").append("checkLogin erfolgreich<br/>")
+							 .append($("<div/>")
+							 		 .html(token));
+					callback(null, token);
 				}
 			});
-		});
+		}
+
+		function checkApiGet(error, token)
+		{
+			$.ajax({
+				url: restserviceUrl + "api.php/user",
+				type: "get",
+				headers: {
+					"Authorization": token
+				},
+				dataType: "json",
+				error: function(){
+					$("body").append("checkApiGet fehlgeschlagen<br/>");
+				},
+				success: function(result){
+					$("body").append("checkApiGet erfolgreich:<br/>")
+							 .append($("<div/>")
+							 		 .html(result.length));
+					//checkApiInsert(token);
+				}
+			});
+		}
+
+		function checkApiInsert(token)
+		{
+			$.ajax({
+				url: restserviceUrl + "api.php/user",
+				type: "get",
+				headers: {
+					"Authorization": token
+				},
+				dataType: "json",
+				error: function(){
+					$("body").append("checkApiInsert fehlgeschlagen<br/>");
+				},
+				success: function(result){
+					$("body").append("checkApiInsert erfolgreich:<br/>")
+							 .append($("<div/>")
+							 		 .html(result));
+				}
+			});
+		}
 	</script>
 </head>
 <body>
-<div id="div"></div>
 </body>
 </html>

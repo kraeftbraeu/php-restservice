@@ -1,8 +1,8 @@
 <?php
-	require "ht/connect.php";
-	require "service/JwtService.php";
-	require "service/LogService.php";
-	require "service/AdminService.php";
+	require_once "ht/connect.php";
+	require_once "service/JwtService.php";
+	require_once "service/LogService.php";
+	require_once "service/AdminService.php";
 	
 	$warning = "";
 	$success = "";
