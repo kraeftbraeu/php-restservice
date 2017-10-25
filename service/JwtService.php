@@ -21,17 +21,15 @@ class JwtService
 
 	public function getToken($user)
 	{
-		return json_encode(array(
-			'token' => (new Builder())->setIssuer("https://".$_SERVER['SERVER_NAME'])
-									  ->setIssuedAt(time())
-									  ->setExpiration(time()+(60*60*24))
-									  ->set('u_id', $user->u_id)
-									  ->set('u_name', $user->u_name)
-									  ->set('u_adm', $user->u_adm)
-									  ->sign($this->signer, Jwtpw::$jwtpw)
-									  ->getToken()
-									  ->__toString()
-		));
+		return (new Builder())->setIssuer("https://".$_SERVER['SERVER_NAME'])
+							  ->setIssuedAt(time())
+							  ->setExpiration(time()+(60*60)) // 60min
+							  ->set('u_id', $user->u_id)
+							  ->set('u_name', $user->u_name)
+							  ->set('u_adm', $user->u_adm)
+							  ->sign($this->signer, Jwtpw::$jwtpw)
+							  ->getToken()
+							  ->__toString();
 	}
 
 	public function getUserFromJwt()
@@ -64,11 +62,10 @@ class JwtService
 				$isValid = $isValid && $jwt->verify($this->signer, Jwtpw::$jwtpw);
 				
 				$user = new User($jwt->getClaim('u_id'), $jwt->getClaim('u_name'), $jwt->getClaim('u_adm'));
-				//$isAdmin = $user->admin === "Y";
 
-				$isValid = $isValid && isset($user->id);
-				$isValid = $isValid && isset($user->name);
-				//$isValid = $isValid && isset($user->admin);
+				$isValid = $isValid && isset($user->u_id);
+				$isValid = $isValid && isset($user->u_name);
+				//$isValid = $isValid && isset($user->u_adm);
 			}
 		}
 		catch (Exception $e)

@@ -43,9 +43,11 @@
 		die("no new password found");
 	}
 	$newPwHash = password_hash($newPw, PASSWORD_DEFAULT);
-	$sqlService->execute("UPDATE user SET u_pw = '".$newPwHash."' WHERE u_id = '".$user->id."'");
+	$sqlService->execute("UPDATE user SET u_pw = '".$newPwHash."' WHERE u_id = '".$user->u_id."'");
 	
-	echo $jwtService->getToken($user);
+	echo json_encode(array(
+		'token' => $jwtService->getToken($user)
+	));
 	
 	mysqli_close($link);
 ?>

@@ -69,7 +69,9 @@
 	$sql .= " WHERE u_id = '".$userId."'";
 	$sqlService->execute($sql);
 	
-	echo $jwtService->getToken($userObject);
+	echo json_encode(array(
+		'token' => $jwtService->getToken($userObject)
+	));
 	
 	mysqli_close($link);
 ?>
