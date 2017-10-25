@@ -4,6 +4,9 @@
 	require_once "service/LogService.php";
 	require_once "service/SqlService.php";
 
+	// allow cross-origin request
+	header('Access-Control-Allow-Origin: *'); 
+	
 	$method = $_SERVER['REQUEST_METHOD'];
 	if($method === 'OPTIONS')
 	{
@@ -59,9 +62,6 @@
 		}
 	}
 	
-	// allow cross-origin request
-	header('Access-Control-Allow-Origin: *'); 
-
 	// create SQL based on HTTP method
 	$idField = isset($field) ? $field : substr($table, 0, 1)."_id";
 	switch ($method)
