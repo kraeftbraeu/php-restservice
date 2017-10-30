@@ -33,8 +33,8 @@ class SqlService
 		$result = $this->execute($sql);
 		if (mysqli_num_rows($result) != 1)
 		{
-			$logService->logError(mysqli_num_rows($result)." objects found for sql <".$sql.">");
-			mysqli_close($link);
+			$this->logService->logError(mysqli_num_rows($result)." objects found for sql <".$sql.">");
+			mysqli_close($this->link);
 			http_response_code(401);
 			die("no unique object found");
 		}
