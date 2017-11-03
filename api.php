@@ -64,6 +64,7 @@
 	
 	// create SQL based on HTTP method
 	$idField = isset($field) ? $field : substr($table, 0, 1)."_id";
+	$sqlResult = null;
 	switch ($method)
 	{
 		case 'GET': {
@@ -73,26 +74,34 @@
 			else
 				$fields = "*";
 			$sqlResult = $sqlService->execute("SELECT $fields FROM $table".($key ? " WHERE $idField=$key" : ''));
-			$result = array();
-			while($r = mysqli_fetch_assoc($sqlResult))
-				$result[] = $r;
+			if($sqlResult !== null)
+			{
+				$result = array();
+				while($r = mysqli_fetch_assoc($sqlResult))
+					$result[] = $r;
+			}
 			break;
 		}
 		case 'PUT': {
-			$sqlService->execute("UPDATE $table SET $set WHERE $idField=$key");
+			$sqlResult = $sqlService->execute("UPDATE $table SET $set WHERE $idField=$key");
 			$result = $key;
 			break;
 		}
 		case 'POST': {
-			$sqlService->execute("INSERT INTO $table SET $set");
+			$sqlResult = $sqlService->execute("INSERT INTO $table SET $set");
 			$result = mysqli_insert_id($link);
 			break;
 		}
 		case 'DELETE': {
-			$sqlService->execute("DELETE FROM $table WHERE $idField=$key");
+			$sqlResult = $sqlService->execute("DELETE FROM $table WHERE $idField=$key");
 			$result = mysqli_affected_rows($link);
 			break;
 		}
+	}
+	if($sqlResult === null)
+	{
+		http_response_code(400);
+		die("SQL error");
 	}
 
 	// print results, insert id or affected row count

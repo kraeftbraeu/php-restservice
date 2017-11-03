@@ -22,6 +22,7 @@ class SqlService
 		{
 			$this->logService->logError(mysqli_error($this->link));
 			mysqli_close($this->link);
+			return null;
 			http_response_code(400);
 			die("SQL error");
 		}
@@ -31,12 +32,13 @@ class SqlService
 	public function selectUnique($sql)
 	{
 		$result = $this->execute($sql);
-		if (mysqli_num_rows($result) != 1)
+		if ($result === null)
+			return null;
+		else if(mysqli_num_rows($result) != 1)
 		{
 			$logService->logError(mysqli_num_rows($result)." objects found for sql <".$sql.">");
 			mysqli_close($link);
-			http_response_code(401);
-			die("no unique object found");
+			return null;
 		}
 		return mysqli_fetch_object($result);
 	}

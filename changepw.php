@@ -43,7 +43,12 @@
 		die("no new password found");
 	}
 	$newPwHash = password_hash($newPw, PASSWORD_DEFAULT);
-	$sqlService->execute("UPDATE user SET u_pw = '".$newPwHash."' WHERE u_id = '".$user->u_id."'");
+	$sqlResult = $sqlService->execute("UPDATE user SET u_pw = '".$newPwHash."' WHERE u_id = '".$user->u_id."'");
+	if($sqlResult === null)
+	{
+		http_response_code(400);
+		die("SQL error");
+	}
 	
 	echo json_encode(array(
 		'token' => $jwtService->getToken($user)

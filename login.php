@@ -40,6 +40,11 @@
 	}
 	
 	$userObject = $sqlService->selectUnique("SELECT * FROM user WHERE u_name = '".$loginUser."'");
+	if($userObject === null)
+	{
+		http_response_code(401);
+		die("no unique user found");
+	}
 	$dbPwHash = $userObject->u_pw;
 	if (!password_verify($loginPw, $dbPwHash))
 	{
@@ -67,7 +72,12 @@
 	if($newPwHash != null)
 		$sql .= ", u_pw = '".$newPwHash."'";
 	$sql .= " WHERE u_id = '".$userId."'";
-	$sqlService->execute($sql);
+	$sqlResult = $sqlService->execute($sql);
+	if($sqlResult === null)
+	{
+		http_response_code(400);
+		die("SQL error");
+	}
 	
 	echo json_encode(array(
 		'token' => $jwtService->getToken($userObject)
