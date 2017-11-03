@@ -8,6 +8,11 @@
 	$success = "";
 
 	$user = (new JwtService(new LogService()))->getUserFromJwt();
+	if($user === null)
+	{
+		http_response_code(403);
+		die("jwt error");
+	}
 	$isAdmin = $user->isAdmin();
 	if ($isAdmin)
 	{

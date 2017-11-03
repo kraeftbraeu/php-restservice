@@ -26,6 +26,11 @@
 	}
 	
 	$user = $jwtService->getUserFromJwt();
+	if($user === null)
+	{
+		http_response_code(403);
+		die("jwt error");
+	}
 
 	// login via post form
 	if(isset($_POST['newpw']))

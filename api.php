@@ -19,6 +19,11 @@
 	$sqlService = new SqlService($link, $logService);
 	$jwtService = new JwtService($logService);
 	$user = $jwtService->getUserFromJwt();
+	if($user === null)
+	{
+		http_response_code(403);
+		die("jwt error");
+	}
 
 	// get the HTTP method, path and body of the request
 	$request = explode('/', trim($_SERVER['PATH_INFO'], '/'));
