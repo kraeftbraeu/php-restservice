@@ -23,8 +23,6 @@ class SqlService
 			$this->logService->logError(mysqli_error($this->link));
 			mysqli_close($this->link);
 			return null;
-			http_response_code(400);
-			die("SQL error");
 		}
 		return $result;
 	}
@@ -36,7 +34,7 @@ class SqlService
 			return null;
 		else if(mysqli_num_rows($result) != 1)
 		{
-			$logService->logError(mysqli_num_rows($result)." objects found for sql <".$sql.">");
+			$this->$logService->logError(mysqli_num_rows($result)." objects found for sql <".$sql.">");
 			mysqli_close($link);
 			return null;
 		}
