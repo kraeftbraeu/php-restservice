@@ -34,8 +34,8 @@ class SqlService
 			return null;
 		else if(mysqli_num_rows($result) != 1)
 		{
-			$this->$logService->logError(mysqli_num_rows($result)." objects found for sql <".$sql.">");
-			mysqli_close($link);
+			$this->logService->logError(mysqli_num_rows($result)." objects found for sql <".$sql.">");
+			mysqli_close($this->link);
 			return null;
 		}
 		return mysqli_fetch_object($result);

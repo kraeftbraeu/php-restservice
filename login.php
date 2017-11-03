@@ -26,17 +26,14 @@
 	$sqlService = new SqlService($link, $logService);
 	$jwtService = new JwtService($logService);
 	
-	// login via post form
-	if(isset($_POST['user']) && isset($_POST['pw']))
+	// login
+	$jsonData = json_decode(file_get_contents('php://input'), true);
+	$loginUser = $jsonData['user'];
+	$loginPw = $jsonData['pw'];
+	if(!isset($loginUser) || !isset($loginPw))
 	{
-		$loginUser = mysqli_real_escape_string($link, $_POST['user']);
-		$loginPw = $_POST['pw'];
-	}
-	else
-	{
-		$jsonData = json_decode(file_get_contents('php://input'), true);
-		$loginUser = $jsonData['user'];
-		$loginPw = $jsonData['pw'];
+		http_response_code(400);
+		die("no login parameters found");
 	}
 	
 	$userObject = $sqlService->selectUnique("SELECT * FROM user WHERE u_name = '".$loginUser."'");
