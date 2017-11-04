@@ -1,14 +1,9 @@
 <?php
 class HttpService
 {
-	public function getServerName()
-	{
-		return $this->getServerVariable("SERVER_NAME");
-	}
-	
 	public function getServerVariable($variableName)
 	{
-		return $_SERVER[$variableName];
+		return filter_input(INPUT_SERVER, $variableName, FILTER_SANITIZE_STRING);
 	}
 }
 ?>
