@@ -68,7 +68,7 @@ class JwtService
 		}
 		catch (Exception $e)
 		{
-			$this->logService->logError($exception);
+			$this->logService->logError($e);
 			return null;
 		}
 		if($isValid !== true)
